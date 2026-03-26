@@ -16,6 +16,83 @@ Next.js (App Router) + localStorage를 활용하여 **서버 없이 동작하는
 
 ---
 
+## Next.js 페이지 이동 (Navigation) 가이드
+
+이번 과제에서는 페이지 간 이동이 자주 필요합니다. Next.js App Router에서 페이지를 이동하는 방법 2가지를 알아두세요.
+
+### 방법 1: `useRouter` (이벤트 핸들러에서 이동)
+
+버튼 클릭, 폼 제출 등 **JS 로직 안에서** 이동할 때 사용합니다.
+
+```typescript
+"use client";
+import { useRouter } from "next/navigation";  // ⚠️ next/router가 아닙니다!
+
+export default function MyComponent() {
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push("/community");       // 해당 페이지로 이동
+  };
+
+  return <button onClick={handleClick}>목록으로</button>;
+}
+```
+
+| 메서드                 | 설명                               |
+| ---------------------- | ---------------------------------- |
+| `router.push("/경로")` | 해당 경로로 이동 (히스토리에 추가) |
+| `router.back()`        | 뒤로 가기                          |
+
+### 방법 2: `<Link>` 컴포넌트 (클릭으로 이동)
+
+단순히 **클릭하면 이동**하는 링크/버튼에 사용합니다. `<a>` 태그 대신 사용한다고 생각하면 됩니다.
+
+```typescript
+import Link from "next/link";
+
+export default function MyComponent() {
+  return (
+    <div>
+      <Link href="/community">목록으로</Link>
+      <Link href="/community/write">글 작성</Link>
+      <Link href={`/community/${post.id}`}>상세 보기</Link>
+    </div>
+  );
+}
+```
+
+### 언제 뭘 쓰나요?
+
+| 상황                           | 추천        |
+| ------------------------------ | ----------- |
+| 단순 링크 (클릭하면 바로 이동) | `<Link>`    |
+| 폼 제출 후 이동, 조건부 이동   | `useRouter` |
+
+> **이번 과제 기준:**
+>
+> - PostCard 클릭 → `<Link>` 또는 `useRouter` 둘 다 가능
+> - "글 작성" 버튼 → `<Link>`가 간편
+> - 글 작성 완료 후 목록으로 이동 → `useRouter` (savePosts 후 이동해야 하므로)
+
+### URL 파라미터 읽기: `useParams`
+
+`/community/[id]` 같은 동적 경로에서 `id` 값을 가져올 때 사용합니다.
+
+```typescript
+"use client";
+import { useParams } from "next/navigation";
+
+export default function PostDetailPage() {
+    const params = useParams();
+    const id = params.id as string; // URL이 /community/3 이면 id = "3"
+
+    // id를 이용해 해당 게시글 찾기
+}
+```
+
+---
+
 ## 시작하기 전에
 
 ### 1. 포크한 레포지토리 클론
