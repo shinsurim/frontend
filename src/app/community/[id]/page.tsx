@@ -1,5 +1,9 @@
 "use client";
-
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { getPosts, savePosts } from "@/lib/mockData";
+import { Comment, Post } from "@/types/post";
+import CommentItem from "@/components/CommentItem";
 // TODO: 필요한 import를 추가하세요
 // - useState, useEffect (react)
 // - useParams (next/navigation)
@@ -8,30 +12,118 @@
 // - CommentItem 컴포넌트 (components/CommentItem)
 
 export default function PostDetailPage() {
-  // TODO: useParams()로 id 가져오기
+  const params = useParams();
+  const postId = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  // TODO: post 상태를 만드세요 (useState)
+  const [post, setPost] = useState<Post | null>(null);
+  const [commentContent, setCommentContent] = useState("");
 
-  // TODO: useEffect로 id에 해당하는 게시글 찾기
+  useEffect(() => {
+    if (!postId) {
+      setPost(null);
+      return;
+    }
 
-  // TODO: handleLike 함수 구현
-  // 1. post의 likes +1
-  // 2. savePosts()로 저장
-  // 3. useState로 화면 업데이트
+    try {
+      const posts = getPosts();
+      const found = posts.find((p) => p.id === postId) ?? null;
+      setPost(found);
+    } catch {
+      setPost(null);
+    }
+  }, [postId]);
 
-  // TODO: handleComment 함수 구현
-  // 1. 새 Comment 객체 생성
-  // 2. post.comments에 추가
-  // 3. savePosts()로 저장
-  // 4. useState로 화면 업데이트
+  const createdAtLabel = (() => {
+    if (!post) return "";
+    const date = new Date(post.createdAt);
+    return Number.isNaN(date.getTime())
+      ? post.createdAt
+      : date.toLocaleString("ko-KR");
+  })();
+
+  const handleLike = () => {
+    if (!post) return;
+
+    const updatedPost: Post = {
+      ...post,
+      likes: post.likes + 1,
+    };
+
+    const posts = getPosts();
+    const updatedPosts = posts.map((p) =>
+      p.id === post.id ? updatedPost : p,
+    );
+    savePosts(updatedPosts);
+    setPost(updatedPost);
+  };
+
+  const handleComment = () => {
+    if (!post) return;
+
+    const content = commentContent.trim();
+    if (!content) return;
+
+    const newComment: Comment = {
+      id: Date.now().toString(),
+      content,
+      author: "익명",
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedPost: Post = {
+      ...post,
+      comments: [...(post.comments ?? []), newComment],
+    };
+
+    const posts = getPosts();
+    const updatedPosts = posts.map((p) =>
+      p.id === post.id ? updatedPost : p,
+    );
+    savePosts(updatedPosts);
+    setPost(updatedPost);
+    setCommentContent("");
+  };
 
   return (
     <div>
       <h1>게시글 상세</h1>
-      {/* TODO: 게시글 제목, 내용, 작성자, 작성일 표시 */}
-      {/* TODO: 좋아요 버튼 + 좋아요 수 */}
-      {/* TODO: 댓글 목록 (CommentItem 사용) */}
-      {/* TODO: 댓글 입력창 + 작성 버튼 */}
+      {!post ? (
+        <p>게시글을 찾을 수 없습니다.</p>
+      ) : (
+        <>
+          <h2>{post.title}</h2>
+          <p style={{ whiteSpace: "pre-wrap" }}>{post.content}</p>
+
+          <div>
+            <div>작성자: {post.author}</div>
+            <div>작성일: {createdAtLabel}</div>
+          </div>
+
+          <button type="button" onClick={handleLike}>
+            좋아요 {post.likes}
+          </button>
+
+          <section>
+            <h3>댓글</h3>
+            <div>
+              {post.comments.map((comment) => (
+                <CommentItem key={comment.id} comment={comment} />
+              ))}
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+              <textarea
+                value={commentContent}
+                onChange={(e) => setCommentContent(e.target.value)}
+                placeholder="댓글을 입력하세요"
+              />
+              <button type="button" onClick={handleComment}>
+                댓글 작성
+              </button>
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 }

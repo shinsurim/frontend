@@ -7,12 +7,28 @@ interface CommentItemProps {
 }
 
 export default function CommentItem({ comment }: CommentItemProps) {
-  // TODO: 댓글 UI를 구현하세요
-  // - 작성자, 댓글 내용, 작성 시간 표시
+  const createdAtLabel = (() => {
+    const date = new Date(comment.createdAt);
+    return Number.isNaN(date.getTime())
+      ? comment.createdAt
+      : date.toLocaleString("ko-KR");
+  })();
+
   return (
-    <div>
-      <p>{comment.content}</p>
-      {/* 나머지를 구현하세요 */}
-    </div>
+    <article className="rounded-lg border border-border bg-card p-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium">{comment.author}</span>
+        <time
+          dateTime={comment.createdAt}
+          className="text-xs text-muted-foreground"
+        >
+          {createdAtLabel}
+        </time>
+      </div>
+
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">
+        {comment.content}
+      </p>
+    </article>
   );
 }

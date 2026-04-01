@@ -1,22 +1,53 @@
 "use client";
 
-// TODO: 필요한 import를 추가하세요
-// - useState, useEffect (react)
-// - useRouter (next/navigation)
-// - getPosts (lib/mockData)
-// - Post 타입 (types/post)
-// - PostCard 컴포넌트 (components/PostCard)
+import PostCard from "@/components/PostCard";
+import { getPosts, savePosts } from "@/lib/mockData";
+import { Post } from "@/types/post";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function CommunityPage() {
-  // TODO: useState로 posts 상태를 만드세요
+  const router = useRouter();
+  const [posts, setPosts] = useState<Post[]>([]);
 
-  // TODO: useEffect로 localStorage에서 게시글 목록을 불러오세요
+  useEffect(() => {
+    // 페이지 진입 시 getPosts()로 게시글 목록을 불러옵니다.
+    try {
+      setPosts(getPosts());
+    } catch {
+      setPosts([]);
+    }
+  }, []);
+
+  const handleLike = (postId: string) => {
+    setPosts((prev) => {
+      const updated = prev.map((post) =>
+        post.id === postId ? { ...post, likes: post.likes + 1 } : post,
+      );
+      savePosts(updated);
+      return updated;
+    });
+  };
 
   return (
-    <div>
-      <h1>커뮤니티</h1>
-      {/* TODO: "글 작성" 버튼 → /community/write로 이동 */}
-      {/* TODO: posts 배열을 map으로 돌면서 PostCard 렌더링 */}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold">커뮤니티</h1>
+
+        <button
+          type="button"
+          onClick={() => router.push("/community/write")}
+          className="rounded-xl border border-border bg-card px-4 py-2 transition-colors hover:bg-accent hover:text-accent-foreground"
+        >
+          글 작성
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} onLike={handleLike} />
+        ))}
+      </div>
     </div>
   );
 }
