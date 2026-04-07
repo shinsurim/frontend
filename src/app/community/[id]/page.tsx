@@ -100,7 +100,7 @@ export default function PostDetailPage() {
 
   const handleDelete = async () => {
     if (!postId || isDeleting) return;
-    const ok = confirm("정말 삭제할까요?");
+    const ok = confirm("정말 삭제하시겠습니까?");
     if (!ok) return;
 
     setIsDeleting(true);
