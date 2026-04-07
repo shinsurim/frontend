@@ -111,6 +111,13 @@ export const getPosts = (): Post[] => {
   return data ? JSON.parse(data) : initialPosts;
 };
 
+// GET /posts (목록 조회) 비동기 버전 (클라이언트에서 API처럼 사용)
+export const fetchPosts = async (): Promise<Post[]> => {
+  // 로컬스토리지는 동기지만, "API 호출" UX를 만들기 위해 지연을 둡니다.
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return getPosts();
+};
+
 export const savePosts = (posts: Post[]) => {
   localStorage.setItem("posts", JSON.stringify(posts));
 };

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { getPosts, savePosts } from "@/lib/mockData";
 import { Comment, Post } from "@/types/post";
@@ -15,23 +15,20 @@ export default function PostDetailPage() {
   const params = useParams();
   const postId = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  const [post, setPost] = useState<Post | null>(null);
   const [commentContent, setCommentContent] = useState("");
+  const [refreshTick, setRefreshTick] = useState(0);
 
-  useEffect(() => {
-    if (!postId) {
-      setPost(null);
-      return;
-    }
-
+  const post = useMemo((): Post | null => {
+    if (!postId) return null;
+    // refreshTick은 로컬스토리지 변경 이후 useMemo를 다시 돌리기 위한 트리거입니다.
+    void refreshTick;
     try {
       const posts = getPosts();
-      const found = posts.find((p) => p.id === postId) ?? null;
-      setPost(found);
+      return posts.find((p) => p.id === postId) ?? null;
     } catch {
-      setPost(null);
+      return null;
     }
-  }, [postId]);
+  }, [postId, refreshTick]);
 
   const createdAtLabel = (() => {
     if (!post) return "";
@@ -54,7 +51,7 @@ export default function PostDetailPage() {
       p.id === post.id ? updatedPost : p,
     );
     savePosts(updatedPosts);
-    setPost(updatedPost);
+    setRefreshTick((t) => t + 1);
   };
 
   const handleComment = () => {
@@ -80,7 +77,7 @@ export default function PostDetailPage() {
       p.id === post.id ? updatedPost : p,
     );
     savePosts(updatedPosts);
-    setPost(updatedPost);
+    setRefreshTick((t) => t + 1);
     setCommentContent("");
   };
 

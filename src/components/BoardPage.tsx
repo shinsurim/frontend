@@ -1,11 +1,9 @@
 "use client";
 
 import PostCard from "@/components/PostCard";
-import { getPosts } from "@/lib/mockData";
 import { Post } from "@/types/post";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 const CATEGORIES = [
   { id: "all", label: "ALL" },
@@ -14,17 +12,16 @@ const CATEGORIES = [
   { id: "tips", label: "TIPS" },
 ] as const;
 
-export default function BoardPage() {
+export default function BoardPage({
+  posts,
+  loading,
+  error,
+}: {
+  posts: Post[];
+  loading: boolean;
+  error: string | null;
+}) {
   const router = useRouter();
-  const [posts, setPosts] = useState<Post[]>([]);
-
-  useEffect(() => {
-    try {
-      setPosts(getPosts());
-    } catch {
-      setPosts([]);
-    }
-  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#fafafa] text-neutral-900">
@@ -116,15 +113,19 @@ export default function BoardPage() {
             </button>
           </div>
 
-          <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <li key={post.id} className="min-h-0">
-                <PostCard post={post} />
-              </li>
-            ))}
-          </ul>
-
-          {posts.length === 0 && (
+          {loading ? (
+            <p className="py-16 text-center text-sm text-neutral-500">로딩 중…</p>
+          ) : error ? (
+            <p className="py-16 text-center text-sm text-red-600">{error}</p>
+          ) : posts.length > 0 ? (
+            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {posts.map((post) => (
+                <li key={post.id} className="min-h-0">
+                  <PostCard post={post} />
+                </li>
+              ))}
+            </ul>
+          ) : (
             <p className="py-16 text-center text-sm text-neutral-500">아직 게시글이 없습니다.</p>
           )}
         </div>

@@ -1,18 +1,17 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getPosts, savePosts } from "@/lib/mockData";
 import { Post } from "@/types/post";
-
 
 export default function WritePage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  const handleSubmit = () => {
-    const newPost: Post = {
-      id: Date.now().toString(),
+  const handleSubmit = async () => {
+    if (!title.trim() || !content.trim()) return;
+
+    const newPost: Omit<Post, "id"> = {
       title,
       content,
       author: "익명",
@@ -21,10 +20,14 @@ export default function WritePage() {
       comments: [],
     };
 
-    const posts = getPosts();
-    const updatedPosts = [newPost, ...posts];
+    await fetch("/api/posts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newPost),
+    });
 
-    savePosts(updatedPosts);
     router.push("/community");
   };
 
