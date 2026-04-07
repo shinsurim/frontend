@@ -1,141 +1,123 @@
 "use client";
 
+import Navbar from "@/components/Navbar";
 import PostCard from "@/components/PostCard";
 import { PostBase } from "@/types/post";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-const CATEGORIES = [
-  { id: "all", label: "ALL" },
-  { id: "discussion", label: "DISCUSSION" },
-  { id: "qna", label: "Q&A" },
-  { id: "tips", label: "TIPS" },
-] as const;
 
 export default function BoardPage({
   posts,
   loading,
   error,
 }: {
-  posts: PostBase[];
+  posts: (PostBase & { commentCount?: number })[];
   loading: boolean;
   error: string | null;
 }) {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#fafafa] text-neutral-900">
-      <header className="sticky top-0 z-50 border-b border-neutral-200/80 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl flex-col gap-5 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8 md:px-10">
-          <Link
-            href="/community"
-            className="font-serif-brand shrink-0 text-sm font-medium tracking-[0.35em] text-neutral-800"
-          >
-            FIELD
-          </Link>
+    <div className="min-h-screen bg-white text-slate-900">
+      <Navbar />
 
-          <nav
-            className="flex flex-1 flex-wrap justify-center gap-x-8 gap-y-2 text-xs font-medium tracking-[0.2em] text-neutral-600 sm:justify-center"
-            aria-label="Main"
-          >
-            <Link href="/community" className="transition-colors hover:text-neutral-900">
-              BOARD
-            </Link>
-            <Link href="/community/write" className="transition-colors hover:text-neutral-900">
-              WRITE
-            </Link>
-            <Link href="#about" className="transition-colors hover:text-neutral-900">
-              ABOUT
-            </Link>
-          </nav>
-
-          <div className="flex items-center justify-center gap-6 text-xs tracking-[0.15em] text-neutral-500 sm:justify-end">
-            <button type="button" className="transition-colors hover:text-neutral-900">
-              LOG IN
-            </button>
-            <span className="text-neutral-300" aria-hidden>
-              /
-            </span>
-            <button type="button" className="transition-colors hover:text-neutral-900">
-              SIGN UP
-            </button>
+      <section className="relative overflow-hidden border-b border-slate-100">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(99,102,241,0.14),_transparent_45%),radial-gradient(circle_at_bottom_left,_rgba(59,130,246,0.1),_transparent_42%)]" />
+        <div className="relative mx-auto grid w-full max-w-6xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:items-center lg:py-24">
+          <div>
+            <p className="mb-4 inline-flex rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600">
+              Community Platform
+            </p>
+            <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+              Community Board
+            </h1>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-500">
+              생각을 나누고, 연결되는 공간
+              가볍게 질문하고, 경험을 공유해보세요.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                href="/community/write"
+                className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_rgba(79,70,229,0.28)] transition-all hover:-translate-y-0.5 hover:bg-indigo-500"
+              >
+                글 작성하기
+              </Link>
+              <button
+                type="button"
+                onClick={() => router.push("/community")}
+                className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                둘러보기
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
 
-      <section
-        className="border-b border-neutral-200/80 bg-white"
-        style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.045) 1px, transparent 0)`,
-          backgroundSize: "28px 28px",
-        }}
-      >
-        <div className="mx-auto max-w-6xl px-6 py-20 text-center md:px-10 md:py-28">
-          <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.45em] text-neutral-400">
-            Journal &amp; Stories
-          </p>
-          <h1 className="font-serif-brand text-4xl font-normal tracking-[0.08em] text-neutral-900 md:text-5xl lg:text-6xl">
-            COMMUNITY
-          </h1>
-          <p className="mx-auto mt-6 max-w-md text-sm leading-relaxed text-neutral-500">
-            질문과 경험을 나누는 공간입니다. 여백 속에서 천천히 읽고 기록해 보세요.
-          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+              <p className="text-xs text-slate-400">TODAY</p>
+              <p className="mt-2 text-2xl font-semibold text-slate-900">{posts.length}</p>
+              <p className="mt-1 text-sm text-slate-500">전체 게시글 수</p>
+            </div>
+            <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5 shadow-[0_10px_30px_rgba(99,102,241,0.12)]">
+              <p className="text-xs text-indigo-500">ENGAGEMENT</p>
+              <p className="mt-2 text-2xl font-semibold text-indigo-700">
+                {posts.reduce((sum, post) => sum + post.likes, 0)}
+              </p>
+              <p className="mt-1 text-sm text-indigo-600/80">누적 좋아요</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] sm:col-span-2">
+              <p className="text-xs text-slate-400">PREVIEW</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              질문하고, 답하고, 경험을 나누는 공간입니다.  <br />
+              서로의 이야기를 통해 새로운 연결이 만들어집니다.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-12 px-6 py-14 md:flex-row md:gap-16 md:px-10 md:py-20">
-        <aside className="shrink-0 md:w-28" aria-label="카테고리">
-          <ul className="flex flex-row gap-8 md:flex-col md:gap-6">
-            {CATEGORIES.map((cat) => (
-              <li key={cat.id}>
-                <span className="text-[10px] font-medium uppercase tracking-[0.35em] text-neutral-400">
-                  {cat.label}
-                </span>
+      <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Latest Posts</h2>
+            <p className="mt-1 text-sm text-slate-500">커뮤니티 최신 글을 빠르게 확인하세요.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push("/community/write")}
+            className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500"
+          >
+            + 새 글 작성
+          </button>
+        </div>
+
+        {loading ? (
+          <p className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
+            게시글을 불러오는 중입니다...
+          </p>
+        ) : error ? (
+          <p className="rounded-2xl border border-rose-200 bg-rose-50 px-6 py-10 text-center text-sm text-rose-600">
+            {error}
+          </p>
+        ) : posts.length > 0 ? (
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {posts.map((post) => (
+              <li key={post.id}>
+                <PostCard post={post} />
               </li>
             ))}
           </ul>
-        </aside>
-
-        <div className="min-w-0 flex-1">
-          <div className="mb-10 flex flex-col gap-2 border-b border-neutral-200 pb-6 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 className="font-serif-brand text-2xl font-normal tracking-wide text-neutral-900">
-                Board
-              </h2>
-              <p className="mt-1 text-xs text-neutral-500">최근 게시글</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => router.push("/community/write")}
-              className="self-start border border-neutral-300 bg-white px-5 py-2.5 text-[10px] font-medium uppercase tracking-[0.25em] text-neutral-700 transition-colors hover:border-neutral-900 hover:bg-neutral-900 hover:text-white md:self-auto"
-            >
-              New post
-            </button>
-          </div>
-
-          {loading ? (
-            <p className="py-16 text-center text-sm text-neutral-500">로딩 중…</p>
-          ) : error ? (
-            <p className="py-16 text-center text-sm text-red-600">{error}</p>
-          ) : posts.length > 0 ? (
-            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {posts.map((post) => (
-                <li key={post.id} className="min-h-0">
-                  <PostCard post={post} />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="py-16 text-center text-sm text-neutral-500">아직 게시글이 없습니다.</p>
-          )}
-        </div>
-      </div>
-
-      <footer id="about" className="border-t border-neutral-200 bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-12 md:px-10">
-          <p className="text-center text-[10px] uppercase tracking-[0.35em] text-neutral-400">
-            © {new Date().getFullYear()} Field Community. All rights reserved.
+        ) : (
+          <p className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-sm text-slate-500">
+            아직 게시글이 없습니다. 첫 글을 작성해보세요.
           </p>
+        )}
+      </section>
+
+      <footer id="about" className="border-t border-slate-100 bg-white">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-5 py-10 text-sm text-slate-500 sm:px-8">
+          <p className="font-medium text-slate-700">PulseBoard</p>
+          <p>미니멀하고 감각적인 커뮤니티 경험을 위한 SaaS 스타일 보드.</p>
         </div>
       </footer>
     </div>
