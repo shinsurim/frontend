@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { AxiosError } from "axios";
 import { createComment, deletePost, fetchPost, toggleLike } from "@/lib/api";
 import { Comment, PostDetail } from "@/types/post";
 import CommentItem from "@/components/CommentItem";
@@ -20,7 +22,12 @@ export default function PostDetailPage() {
   const [isCommenting, setIsCommenting] = useState(false);
 
   const loadPost = async () => {
-    if (!postId) return;
+    if (!postId) {
+      setPost(null);
+      setError("잘못된 게시글 경로입니다.");
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -28,7 +35,11 @@ export default function PostDetailPage() {
       setPost(data);
     } catch (e) {
       setPost(null);
-      setError("게시글을 불러오지 못했습니다.");
+      if (e instanceof AxiosError && e.response?.status === 404) {
+        setError("존재하지 않는 게시글입니다.");
+      } else {
+        setError("게시글을 불러오지 못했습니다.");
+      }
     } finally {
       setLoading(false);
     }
@@ -105,11 +116,17 @@ export default function PostDetailPage() {
 
   return (
     <div>
+      <button type="button" onClick={() => router.push("/community")}>
+        ← 목록으로
+      </button>
       <h1>게시글 상세</h1>
       {loading ? (
         <p>로딩 중…</p>
       ) : error ? (
-        <p>{error}</p>
+        <div>
+          <p>{error}</p>
+          <Link href="/community">목록으로 돌아가기</Link>
+        </div>
       ) : !post ? (
         <p>게시글을 찾을 수 없습니다.</p>
       ) : (
